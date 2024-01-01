@@ -69,9 +69,9 @@ impl Graphic {
                 resolve_target: None,
                 ops: wgpu::Operations {
                     load: wgpu::LoadOp::Clear(wgpu::Color {
-                        r: 0.1,
-                        g: 0.2,
-                        b: 0.3,
+                        r: 0.55,
+                        g: 0.8,
+                        b: 1.0,
                         a: 1.0,
                     }),
                     store: true,
