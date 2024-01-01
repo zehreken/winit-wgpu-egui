@@ -12,3 +12,4 @@ egui-winit = "0.23"
 egui-wgpu = "0.23"
 pollster = "0.3"
 bytemuck = { version = "1.12", features = ["derive"] }
+egui = { version = "0.23", features = ["bytemuck"] }

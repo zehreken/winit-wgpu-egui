@@ -6,9 +6,9 @@ use winit::{
     window::{Window, WindowBuilder},
 };
 
-use crate::graphic;
+use crate::{graphic, gui};
 
-struct App {
+pub struct App {
     window: Window,
     surface: Surface,
     device: Device,
@@ -82,6 +82,14 @@ impl App {
             texture_format,
         }
     }
+
+    pub fn device(&self) -> &Device {
+        &self.device
+    }
+
+    pub fn queue(&self) -> &Queue {
+        &self.queue
+    }
 }
 
 pub async fn start() {
@@ -103,6 +111,7 @@ pub async fn start() {
     // create graphic
     let graphic = graphic::Graphic::new(&app.device, &app.surface_config);
     // create gui
+    let mut gui = gui::Gui::new(&event_loop, &app.device, app.texture_format);
 
     event_loop.run(move |event, _elwt, control_flow| match event {
         Event::WindowEvent {
@@ -110,7 +119,7 @@ pub async fn start() {
             window_id,
         } if window_id == app.window.id() => control_flow.set_exit(),
         Event::WindowEvent { event, .. } => {
-            // app_ui.handle_event(&event);
+            gui.handle_event(&event);
         }
         Event::MainEventsCleared => app.window.request_redraw(),
         Event::RedrawRequested(_) => {
@@ -136,8 +145,7 @@ pub async fn start() {
                     label: Some("encoder"),
                 });
             graphic.render(&mut encoder, &output_view);
-            // app_ui.prepare(&app.window);
-            // app_ui.render(&mut encoder, &output_view, &app);
+            gui.render(&mut encoder, &app.window, &output_view, &app);
             app.queue.submit(Some(encoder.finish()));
             output_frame.present();
         }
