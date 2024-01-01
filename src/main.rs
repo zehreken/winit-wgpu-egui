@@ -1,3 +1,7 @@
+mod app;
+mod graphic;
+mod gui;
+
 fn main() {
-    println!("Hello, world!");
+    pollster::block_on(app::start());
 }
