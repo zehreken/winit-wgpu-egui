@@ -132,11 +132,11 @@ impl Gui {
         // Upload all resources to the GPU.
         for (id, image_delta) in &self.textures.set {
             self.renderer
-                .update_texture(&app.device(), &app.queue(), *id, image_delta);
+                .update_texture(app.device(), app.queue(), *id, image_delta);
         }
         self.renderer.update_buffers(
-            &app.device(),
-            &app.queue(),
+            app.device(),
+            app.queue(),
             encoder,
             &self.paint_jobs,
             &self.screen_descriptor,

@@ -13,7 +13,7 @@ pub struct App {
     surface: Surface,
     device: Device,
     queue: Queue,
-    size: PhysicalSize<u32>,
+    _size: PhysicalSize<u32>,
     surface_config: SurfaceConfiguration,
     texture_format: TextureFormat,
 }
@@ -64,8 +64,8 @@ impl App {
         let surface_config = wgpu::SurfaceConfiguration {
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
             format: texture_format,
-            width: size.width as u32,
-            height: size.height as u32,
+            width: size.width,
+            height: size.height,
             present_mode: surface_caps.present_modes[0],
             alpha_mode: surface_caps.alpha_modes[0],
             view_formats: vec![],
@@ -77,7 +77,7 @@ impl App {
             surface,
             device,
             queue,
-            size,
+            _size: size,
             surface_config,
             texture_format,
         }
