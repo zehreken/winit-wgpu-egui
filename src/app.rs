@@ -135,7 +135,7 @@ pub async fn start() {
                 .create_command_encoder(&wgpu::CommandEncoderDescriptor {
                     label: Some("encoder"),
                 });
-            graphic.render(&mut encoder, &output_view, &app.device, &app.queue);
+            graphic.render(&mut encoder, &output_view);
             // app_ui.prepare(&app.window);
             // app_ui.render(&mut encoder, &output_view, &app);
             app.queue.submit(Some(encoder.finish()));

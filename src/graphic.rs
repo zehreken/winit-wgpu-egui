@@ -1,4 +1,3 @@
-use egui_winit::egui::epaint::Vertex;
 use wgpu::{CommandEncoder, Device, Queue, RenderPipeline, SurfaceConfiguration, TextureView};
 
 pub struct Graphic {
@@ -62,13 +61,7 @@ impl Graphic {
         Self { render_pipeline }
     }
 
-    pub fn render(
-        &self,
-        encoder: &mut CommandEncoder,
-        view: &TextureView,
-        device: &Device,
-        queue: &Queue,
-    ) {
+    pub fn render(&self, encoder: &mut CommandEncoder, view: &TextureView) {
         let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
             label: Some("Render Pass"),
             color_attachments: &[Some(wgpu::RenderPassColorAttachment {
