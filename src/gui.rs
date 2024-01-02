@@ -60,8 +60,8 @@ impl Test {
 }
 
 pub struct Gui {
-    egui_ctx: Context,
-    egui_state: State,
+    ctx: Context,
+    state: State,
     renderer: Renderer,
     screen_descriptor: ScreenDescriptor,
     view: Test,
@@ -94,8 +94,8 @@ impl Gui {
         let view = Test::new();
 
         Self {
-            egui_ctx,
-            egui_state,
+            ctx: egui_ctx,
+            state: egui_state,
             renderer,
             screen_descriptor,
             view,
@@ -105,7 +105,7 @@ impl Gui {
     }
 
     pub fn handle_event(&mut self, event: &winit::event::WindowEvent) {
-        let _ = self.egui_state.on_event(&self.egui_ctx, event);
+        let _ = self.state.on_event(&self.ctx, event);
     }
 
     // resize
@@ -119,15 +119,15 @@ impl Gui {
         render_target: &wgpu::TextureView,
         app: &App,
     ) {
-        let raw_input = self.egui_state.take_egui_input(window);
-        let output = self.egui_ctx.run(raw_input, |egui_ctx| {
+        let raw_input = self.state.take_egui_input(window);
+        let output = self.ctx.run(raw_input, |egui_ctx| {
             self.view.draw(egui_ctx);
         });
 
         self.textures.append(output.textures_delta);
-        self.egui_state
-            .handle_platform_output(window, &self.egui_ctx, output.platform_output);
-        self.paint_jobs = self.egui_ctx.tessellate(output.shapes);
+        self.state
+            .handle_platform_output(window, &self.ctx, output.platform_output);
+        self.paint_jobs = self.ctx.tessellate(output.shapes);
 
         // Upload all resources to the GPU.
         for (id, image_delta) in &self.textures.set {
@@ -160,6 +160,7 @@ impl Gui {
             self.renderer
                 .render(&mut rpass, &self.paint_jobs, &self.screen_descriptor);
         }
+        // dropping rpass here
 
         // Cleanup
         let textures = std::mem::take(&mut self.textures);
