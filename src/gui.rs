@@ -1,4 +1,5 @@
 use crate::app::App;
+use egui::{Color32, RichText};
 use egui_wgpu::wgpu::TextureFormat;
 use egui_wgpu::{renderer::ScreenDescriptor, Renderer};
 use egui_winit::{
@@ -18,15 +19,16 @@ impl Test {
         }
     }
 
-    fn draw(&mut self, ctx: &Context) {
+    fn draw(&mut self, ctx: &Context, fps: f32) {
         egui::TopBottomPanel::top("menubar_container").show(ctx, |ui| {
             egui::menu::bar(ui, |ui| {
+                ui.label(RichText::new(format!("FPS: {0:.2}", fps)).color(Color32::RED));
                 ui.menu_button("File", |ui| {
                     if ui.button("About...").clicked() {
                         self.is_window_open = true;
                         ui.close_menu();
                     }
-                })
+                });
             });
         });
 
@@ -36,7 +38,7 @@ impl Test {
                 ui.label(
                     "This is the most basic example of how to use winit, wgpu and egui together.",
                 );
-                ui.label("Mandatory heart: 💖");
+                ui.label("Mandatory heart: ♥");
 
                 ui.separator();
 
@@ -75,7 +77,7 @@ impl Gui {
         device: &wgpu::Device,
         texture_format: TextureFormat,
     ) -> Self {
-        let scale_factor = 1.;
+        let scale_factor = 2.;
         let (width, height) = (1600, 1200);
         let max_texture_size = device.limits().max_texture_dimension_2d as usize;
 
@@ -118,10 +120,11 @@ impl Gui {
         window: &Window,
         render_target: &wgpu::TextureView,
         app: &App,
+        fps: f32,
     ) {
         let raw_input = self.state.take_egui_input(window);
         let output = self.ctx.run(raw_input, |egui_ctx| {
-            self.view.draw(egui_ctx);
+            self.view.draw(egui_ctx, fps);
         });
 
         self.textures.append(output.textures_delta);

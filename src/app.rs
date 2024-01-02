@@ -1,3 +1,5 @@
+use std::collections::VecDeque;
+
 use wgpu::{Device, Queue, Surface, SurfaceConfiguration, TextureFormat};
 use winit::{
     dpi::{PhysicalSize, Size},
@@ -16,6 +18,7 @@ pub struct App {
     _size: PhysicalSize<u32>,
     surface_config: SurfaceConfiguration,
     texture_format: TextureFormat,
+    rolling_frame_time: VecDeque<f32>,
 }
 
 impl App {
@@ -72,6 +75,7 @@ impl App {
         };
         surface.configure(&device, &surface_config);
 
+        let init = vec![0.0; 60];
         Self {
             window,
             surface,
@@ -80,6 +84,7 @@ impl App {
             _size: size,
             surface_config,
             texture_format,
+            rolling_frame_time: VecDeque::from(init),
         }
     }
 
@@ -113,6 +118,10 @@ pub async fn start() {
     // create gui
     let mut gui = gui::Gui::new(&event_loop, &app.device, app.texture_format);
 
+    let init = [0.0; 60];
+    let mut rolling_frame_times = VecDeque::from(init);
+    let mut earlier = std::time::Instant::now();
+
     event_loop.run(move |event, _elwt, control_flow| match event {
         Event::WindowEvent {
             event: WindowEvent::CloseRequested,
@@ -123,6 +132,11 @@ pub async fn start() {
         }
         Event::MainEventsCleared => app.window.request_redraw(),
         Event::RedrawRequested(_) => {
+            let frame_time = std::time::Instant::now().duration_since(earlier);
+            earlier = std::time::Instant::now();
+            rolling_frame_times.pop_front();
+            rolling_frame_times.push_back(frame_time.as_secs_f32());
+            let fps = calculate_fps(&rolling_frame_times);
             let output_frame = match app.surface.get_current_texture() {
                 Ok(frame) => frame,
                 Err(wgpu::SurfaceError::Outdated) => {
@@ -145,10 +159,17 @@ pub async fn start() {
                     label: Some("encoder"),
                 });
             graphic.render(&mut encoder, &output_view);
-            gui.render(&mut encoder, &app.window, &output_view, &app);
+            gui.render(&mut encoder, &app.window, &output_view, &app, fps);
             app.queue.submit(Some(encoder.finish()));
             output_frame.present();
         }
         _ => {}
     });
+}
+
+pub fn calculate_fps(times: &VecDeque<f32>) -> f32 {
+    let sum: f32 = times.iter().sum();
+
+    let average_time = sum / times.len() as f32;
+    return 1.0 / average_time;
 }
