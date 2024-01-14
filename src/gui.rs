@@ -6,6 +6,7 @@ use egui_winit::{
     egui::{self, ClippedPrimitive, Context, TexturesDelta},
     State,
 };
+use wgpu::Device;
 use winit::{event_loop::EventLoopWindowTarget, window::Window};
 
 struct Test {
@@ -116,7 +117,6 @@ impl Gui {
 
     pub fn render(
         &mut self,
-        encoder: &mut wgpu::CommandEncoder,
         window: &Window,
         render_target: &wgpu::TextureView,
         app: &App,
@@ -137,10 +137,15 @@ impl Gui {
             self.renderer
                 .update_texture(app.device(), app.queue(), *id, image_delta);
         }
+        let mut encoder = app
+            .device()
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("gui encoder"),
+            });
         self.renderer.update_buffers(
             app.device(),
             app.queue(),
-            encoder,
+            &mut encoder,
             &self.paint_jobs,
             &self.screen_descriptor,
         );
@@ -164,7 +169,7 @@ impl Gui {
                 .render(&mut rpass, &self.paint_jobs, &self.screen_descriptor);
         }
         // dropping rpass here
-
+        app.queue().submit(Some(encoder.finish()));
         // Cleanup
         let textures = std::mem::take(&mut self.textures);
         for id in &textures.free {

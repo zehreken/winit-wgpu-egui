@@ -162,7 +162,7 @@ pub async fn start() {
                 });
 
             renderer.render(&app.device, &app.queue, &output_view, elapsed_time);
-            gui.render(&mut encoder, &app.window, &output_view, &app, fps);
+            gui.render(&app.window, &output_view, &app, fps);
             app.queue.submit(Some(encoder.finish()));
             output_frame.present();
         }
