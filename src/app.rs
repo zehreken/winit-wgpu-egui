@@ -155,15 +155,9 @@ pub async fn start() {
             let output_view = output_frame
                 .texture
                 .create_view(&wgpu::TextureViewDescriptor::default());
-            let mut encoder = app
-                .device
-                .create_command_encoder(&wgpu::CommandEncoderDescriptor {
-                    label: Some("encoder"),
-                });
 
             renderer.render(&app.device, &app.queue, &output_view, elapsed_time);
             gui.render(&app.window, &output_view, &app, fps);
-            app.queue.submit(Some(encoder.finish()));
             output_frame.present();
         }
         _ => {}
