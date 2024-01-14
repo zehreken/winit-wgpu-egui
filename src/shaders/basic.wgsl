@@ -3,6 +3,13 @@ struct VertexOutput {
     @builtin(position) clip_position: vec4<f32>,
 };
 
+struct Uniforms {
+    time: f32,
+}
+
+@group(0) @binding(0)
+var<uniform> uniforms: Uniforms;
+
 @vertex
 fn vs_main(
     @builtin(vertex_index) in_vertex_index: u32,
@@ -17,5 +24,5 @@ fn vs_main(
 // Fragment shader
 @fragment
 fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
-    return vec4<f32>(0.27, 0.61, 1.0, 1.0);
+    return vec4<f32>(cos(uniforms.time), 0.61, 1.0, 1.0);
 }

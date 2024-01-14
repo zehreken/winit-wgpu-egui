@@ -8,7 +8,7 @@ use winit::{
     window::{Window, WindowBuilder},
 };
 
-use crate::{graphic, gui};
+use crate::{gui, renderer};
 
 pub struct App {
     window: Window,
@@ -113,14 +113,15 @@ pub async fn start() {
         .unwrap();
 
     let app = App::new(window).await;
-    // create graphic
-    let graphic = graphic::Graphic::new(&app.device, &app.surface_config);
+    // create renderer
+    let mut renderer = renderer::Renderer::new(&app.device, &app.surface_config);
     // create gui
     let mut gui = gui::Gui::new(&event_loop, &app.device, app.texture_format);
 
     let init = [0.0; 60];
     let mut rolling_frame_times = VecDeque::from(init);
     let mut earlier = std::time::Instant::now();
+    let mut elapsed_time = 0.0;
 
     event_loop.run(move |event, _elwt, control_flow| match event {
         Event::WindowEvent {
@@ -133,6 +134,7 @@ pub async fn start() {
         Event::MainEventsCleared => app.window.request_redraw(),
         Event::RedrawRequested(_) => {
             let frame_time = std::time::Instant::now().duration_since(earlier);
+            elapsed_time += frame_time.as_secs_f32();
             earlier = std::time::Instant::now();
             rolling_frame_times.pop_front();
             rolling_frame_times.push_back(frame_time.as_secs_f32());
@@ -158,7 +160,8 @@ pub async fn start() {
                 .create_command_encoder(&wgpu::CommandEncoderDescriptor {
                     label: Some("encoder"),
                 });
-            graphic.render(&mut encoder, &output_view);
+
+            renderer.render(&app.device, &app.queue, &output_view, elapsed_time);
             gui.render(&mut encoder, &app.window, &output_view, &app, fps);
             app.queue.submit(Some(encoder.finish()));
             output_frame.present();
