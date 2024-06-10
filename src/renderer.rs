@@ -1,7 +1,8 @@
 use wgpu::{
-    util::BufferInitDescriptor, util::DeviceExt, BindGroup, BindGroupDescriptor, BindGroupEntry,
-    BindGroupLayoutDescriptor, BindGroupLayoutEntry, Buffer, BufferBindingType, BufferUsages,
-    Device, Queue, RenderPipeline, ShaderStages, SurfaceConfiguration, TextureView,
+    util::{BufferInitDescriptor, DeviceExt},
+    BindGroup, BindGroupDescriptor, BindGroupEntry, BindGroupLayoutDescriptor,
+    BindGroupLayoutEntry, Buffer, BufferBindingType, BufferUsages, Device, Queue, RenderPipeline,
+    ShaderStages, StoreOp, SurfaceConfiguration, TextureView,
 };
 
 #[repr(C)]
@@ -123,10 +124,12 @@ impl Renderer {
                         b: 0.03,
                         a: 1.0,
                     }),
-                    store: true,
+                    store: StoreOp::Store,
                 },
             })],
             depth_stencil_attachment: None,
+            timestamp_writes: None,
+            occlusion_query_set: None,
         });
         render_pass.set_pipeline(&self.render_pipeline);
         render_pass.set_bind_group(0, &self.uniforms_bind_group, &[]);

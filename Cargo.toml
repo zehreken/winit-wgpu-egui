@@ -6,10 +6,10 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-winit = "0.28"
-wgpu = "0.17"
-egui-winit = "0.23"
-egui-wgpu = "0.23"
+winit = "0.29"
+wgpu = "0.19"
+egui-winit = "0.27"
+egui-wgpu = "0.27"
 pollster = "0.3"
 bytemuck = { version = "1.12", features = ["derive"] }
-egui = { version = "0.23", features = ["bytemuck"] }
+egui = { version = "0.27", features = ["bytemuck"] }
