@@ -136,7 +136,9 @@ impl Gui {
         self.textures.append(output.textures_delta);
         self.state
             .handle_platform_output(window, output.platform_output);
-        self.paint_jobs = self.ctx.tessellate(output.shapes, 2.);
+        self.paint_jobs = self
+            .ctx
+            .tessellate(output.shapes, self.ctx.pixels_per_point());
 
         // Upload all resources to the GPU.
         for (id, image_delta) in &self.textures.set {
