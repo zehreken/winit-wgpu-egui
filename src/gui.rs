@@ -74,7 +74,7 @@ pub struct Gui {
 impl Gui {
     pub fn new(window: &Window, device: &wgpu::Device, texture_format: TextureFormat) -> Self {
         let scale_factor = window.scale_factor();
-        let size = window.inner_size().to_logical(scale_factor);
+        let size = window.inner_size();
         let max_texture_size = device.limits().max_texture_dimension_2d as usize;
 
         let egui_ctx = Context::default();

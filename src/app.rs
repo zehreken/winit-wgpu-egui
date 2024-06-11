@@ -23,9 +23,9 @@ impl App {
 }
 
 pub async fn start() {
-    let size = Size::Logical(LogicalSize {
-        width: 800.0,
-        height: 600.0,
+    let size = Size::Physical(PhysicalSize {
+        width: 1600,
+        height: 1200,
     });
     let event_loop = EventLoop::new().unwrap();
     let window = WindowBuilder::new()
