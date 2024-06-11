@@ -1,7 +1,7 @@
 use std::collections::VecDeque;
 
 use winit::{
-    dpi::{PhysicalSize, Size},
+    dpi::{LogicalSize, PhysicalSize, Size},
     event::{Event, WindowEvent},
     event_loop::EventLoop,
     window::{Window, WindowBuilder},
@@ -20,20 +20,12 @@ impl App {
             rolling_frame_time: VecDeque::from(init),
         }
     }
-
-    // pub fn device(&self) -> &Device {
-    //     &self.device
-    // }
-
-    // pub fn queue(&self) -> &Queue {
-    //     &self.queue
-    // }
 }
 
 pub async fn start() {
-    let size = Size::Physical(PhysicalSize {
-        width: 1600,
-        height: 1200,
+    let size = Size::Logical(LogicalSize {
+        width: 800.0,
+        height: 600.0,
     });
     let event_loop = EventLoop::new().unwrap();
     let window = WindowBuilder::new()
@@ -102,19 +94,18 @@ pub async fn start() {
     // create renderer
     let mut renderer = renderer::Renderer::new(&device, &surface_config);
     // create gui
-    let mut gui = gui::Gui::new(&window, &event_loop, &device, texture_format);
+    let mut gui = gui::Gui::new(&window, &device, texture_format);
 
     let init = [0.0; 60];
     let mut rolling_frame_times = VecDeque::from(init);
     let mut earlier = std::time::Instant::now();
     let mut elapsed_time = 0.0;
 
-    event_loop.run(move |event, elwt| match event {
+    let r = event_loop.run(move |event, elwt| match event {
         Event::WindowEvent {
             event: WindowEvent::CloseRequested,
             window_id,
-        } => elwt.exit(),
-        // Event::MainEventsCleared => app.window.request_redraw(),
+        } if window.id() == window_id => elwt.exit(),
         Event::WindowEvent {
             event: WindowEvent::RedrawRequested,
             ..
@@ -145,9 +136,10 @@ pub async fn start() {
             renderer.render(&device, &queue, &output_view, elapsed_time);
             gui.render(&window, &output_view, &device, &queue, fps);
             output_frame.present();
+            window.request_redraw();
         }
         Event::WindowEvent { event, .. } => {
-            gui.handle_event(&event);
+            gui.handle_event(&window, &event);
         }
         _ => {}
     });

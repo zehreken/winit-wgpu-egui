@@ -1,4 +1,3 @@
-use crate::app::App;
 use egui::{Color32, RichText, ViewportId};
 use egui_wgpu::wgpu::TextureFormat;
 use egui_wgpu::{Renderer, ScreenDescriptor};
@@ -7,7 +6,7 @@ use egui_winit::{
     State,
 };
 use wgpu::{Device, Queue};
-use winit::{event_loop::EventLoopWindowTarget, window::Window};
+use winit::window::Window;
 
 struct Test {
     is_window_open: bool,
@@ -73,14 +72,9 @@ pub struct Gui {
 }
 
 impl Gui {
-    pub fn new<T>(
-        window: &Window,
-        event_loop: &EventLoopWindowTarget<T>,
-        device: &wgpu::Device,
-        texture_format: TextureFormat,
-    ) -> Self {
-        let scale_factor = 2.;
-        let (width, height) = (1600, 1200);
+    pub fn new(window: &Window, device: &wgpu::Device, texture_format: TextureFormat) -> Self {
+        let scale_factor = window.scale_factor();
+        let size = window.inner_size().to_logical(scale_factor);
         let max_texture_size = device.limits().max_texture_dimension_2d as usize;
 
         let egui_ctx = Context::default();
@@ -88,13 +82,13 @@ impl Gui {
             egui_ctx.clone(),
             ViewportId::ROOT,
             window,
-            Some(scale_factor),
+            Some(scale_factor as f32),
             Some(max_texture_size),
         );
 
         let screen_descriptor = ScreenDescriptor {
-            size_in_pixels: [width, height],
-            pixels_per_point: scale_factor,
+            size_in_pixels: [size.width, size.height],
+            pixels_per_point: scale_factor as f32,
         };
         let renderer = Renderer::new(device, texture_format, None, 1);
         let textures = TexturesDelta::default();
@@ -112,8 +106,8 @@ impl Gui {
         }
     }
 
-    pub fn handle_event(&mut self, event: &winit::event::WindowEvent) {
-        // let _ = self.state.on_event(&self.ctx, event);
+    pub fn handle_event(&mut self, window: &Window, event: &winit::event::WindowEvent) {
+        let _ = self.state.on_window_event(window, event);
     }
 
     // resize
@@ -138,7 +132,7 @@ impl Gui {
             .handle_platform_output(window, output.platform_output);
         self.paint_jobs = self
             .ctx
-            .tessellate(output.shapes, self.ctx.pixels_per_point());
+            .tessellate(output.shapes, window.scale_factor() as f32);
 
         // Upload all resources to the GPU.
         for (id, image_delta) in &self.textures.set {
